@@ -1,22 +1,51 @@
-const article = document.querySelector("article");
+const body = document.querySelector("body");
 
-// `document.querySelector` may return null if the selector doesn't match anything.
-if (article) {
-  const text = article.textContent;
-  const wordMatchRegExp = /[^\s]+/g; // Regular expression
-  const words = text.matchAll(wordMatchRegExp);
-  // matchAll returns an iterator, convert to array to get word count
-  const wordCount = [...words].length;
-  const readingTime = Math.round(wordCount / 200);
-  const badge = document.createElement("p");
-  // Use the same styling as the publish information in an article's header
-  badge.classList.add("color-secondary-text", "type--caption");
-  badge.textContent = `⏱️ ${readingTime} min read`;
+function trimWord(word) {
+  return word.trim();
+}
 
-  // Support for API reference docs
-  const heading = article.querySelector("h1");
-  // Support for article docs with date
-  const date = article.querySelector("time")?.parentNode;
+const textNodes = [];
+function getTextNodes(element) {
+  for (const child of element.childNodes) {
+    if (child.nodeType === Node.TEXT_NODE) {
+      textNodes.push(child);
+    } else if (child.nodeType === Node.ELEMENT_NODE) {
+      getTextNodes(child);
+    }
+  }
+}
 
-  (date ?? heading).insertAdjacentElement("afterend", badge);
+getTextNodes(body);
+
+function checkWordImportance(word) {
+  if (word === "Sữa Rửa Mặt Dr.G pH Cleansing Gel Foam 200ml") {
+    return "red";
+  } else if (word === "Kem Chống Nắng Nature Republic California Aloe Daily Sun Block SPF50+PA++++ 57ml") {
+    return "yellow";
+  } else if (word === "Mặt Nạ Celderma Crystal Skin Mask 23g") {
+    return "green";
+  } else {
+    return "none";
+  }
+}
+
+for (const textNode of textNodes) {
+  let originalText = textNode.textContent;
+  const coloredWords = [];
+
+  const color = checkWordImportance(originalText);
+
+  if (color !== "none") {
+    const newSpan = document.createElement("span");
+    newSpan.style.color = color;
+    newSpan.textContent = originalText;
+    coloredWords.push(newSpan);
+  }
+  else {
+    coloredWords.push(document.createTextNode(originalText));
+  }
+
+  const combinedContent = document.createDocumentFragment();
+  combinedContent.append(...coloredWords);
+  textNode.parentNode.replaceChild(combinedContent, textNode);
 }
