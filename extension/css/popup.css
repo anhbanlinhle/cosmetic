@@ -1,0 +1,111 @@
+body {
+  font-family: Arial, sans-serif;
+  background-color: #ff864e; /* Change background color */
+}
+
+h1 {
+  text-align: center;
+  color: #333;
+}
+
+#chatBox {
+  height: 300px; /* Make chat box slimmer */
+  width: 250px;
+  border: 1px solid black;
+  border-radius: 15px;
+  padding: 5px;
+  overflow-y: scroll;
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 10px;
+  background-color: white;
+
+  scrollbar-width: none; /* For Firefox */
+  -ms-overflow-style: none; /* For Internet Explorer and Edge */
+}
+
+#chatBox::-webkit-scrollbar {
+  display: none; /* For Chrome, Safari and Opera */
+}
+
+#inputArea {
+  display: flex;
+  justify-content: space-between; /* Add space between input field and send button */
+}
+
+#messageInput {
+  flex-grow: 1;
+  border-radius: 5px;
+  border: orangered;
+  padding: 5px;
+  margin-right: 10px; /* Add space to the right of the input field */
+}
+
+#sendButton {
+  background-color: #ff545f;
+  color: rgb(255, 255, 255);
+  border: none;
+  border-radius: 5px;
+  padding: 5px 10px;
+  cursor: pointer;
+}
+
+.message {
+  max-width: 80%;
+  margin: 5px;
+  padding: 10px;
+  border-radius: 10px;
+  position: relative;
+  word-wrap: break-word;
+  overflow: visible;
+}
+
+.message::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  width: 0;
+  height: 0;
+  border: 15px solid transparent;
+}
+
+.message-left {
+  align-self: flex-start;
+  background-color: #d0d0d0;
+}
+
+.message-right {
+  align-self: flex-end;
+  background-color: #ff545f;
+  color: white;
+}
+
+.typing-indicator {
+  display: flex;
+  justify-content: space-around;
+  width: 50px;
+  height: 15px;
+  background-color: #d0d0d0;
+  border-radius: 10px;
+  padding: 10px;
+  align-self: flex-start;
+  margin: 5px;
+}
+
+.dot {
+  width: 5px;
+  height: 5px;
+  background-color: #000;
+  border-radius: 50%;
+  animation: float 0.75s infinite;
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
