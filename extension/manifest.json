@@ -1,0 +1,38 @@
+{
+  "manifest_version": 3,
+  "name": "C.R.A.B.",
+  "version": "1.0",
+  "description": "Cosmetic Review & Advisory Bot",
+
+  "icons": {
+    "16": "iconss/icon-16.png",
+    "32": "icons/icon-32.png",
+    "48": "icons/icon-48.png",
+    "128": "icons/icon-128.png"
+  },
+
+  "action": {
+    "default_icon": "icons/icon-128.png",
+    "default_popup": "html/popup.html"
+  },
+
+  "content_scripts": [
+    {
+      "js": ["scripts/content.js"],
+      "matches": ["<all_urls>"]
+    }
+  ],
+
+  "background": {
+    "service_worker": "scripts/background.js"
+  },
+  "permissions": ["activeTab", "scripting"],
+  "commands": {
+    "_execute_action": {
+      "suggested_key": {
+        "default": "Ctrl+B",
+        "mac": "Command+B"
+      }
+    }
+  }
+}
