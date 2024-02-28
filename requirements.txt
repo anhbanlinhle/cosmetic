@@ -1,0 +1,4 @@
+scrapy
+mysql-connector-python
+python-dotenv
+kafka-python
