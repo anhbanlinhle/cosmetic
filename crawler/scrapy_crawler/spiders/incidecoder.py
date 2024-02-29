@@ -2,19 +2,14 @@ from typing import Any
 import scrapy
 import json
 import re
-# from db_connector import connector
-# from db_connector import constants
-# from items import Product, Ingredient
-# from ..db_connector import connector
-# from ..db_connector import constants
-# from ..items import Product, Ingredient
 from scrapy_crawler.db_connector import connector
 from scrapy_crawler.db_connector import constants
 from scrapy_crawler.items import Product, Ingredient
+from scrapy_crawler.spiders.base_spider import BaseSpider
 
 from scrapy.http import Request, Response
 
-class IncidecoderSpider(scrapy.Spider):
+class IncidecoderSpider(BaseSpider):
     name = 'incidecoder'
 
     vowel_list = {'u', 'e', 'o', 'a', 'i', 'y'}
@@ -25,6 +20,9 @@ class IncidecoderSpider(scrapy.Spider):
         website = connector.get_website_with_name(self.name)
         product_url = website.url + website.product_suffix
 
+        product_xpath = connector.get_product(website.id)
+        ingredient_xpath = connector.get_ingredient(website.id)
+
         for vowel in self.vowel_list:
             self.end_of_prod = False
             page_index = 1
@@ -32,7 +30,12 @@ class IncidecoderSpider(scrapy.Spider):
 
             while not self.end_of_prod:
                 current_url_with_page = current_url + str(page_index)
-                yield scrapy.Request(url=current_url_with_page, callback=self.parse_link, meta={"domain": website.url, "website_id": website.id})
+                yield scrapy.Request(url=current_url_with_page, 
+                                     callback=self.parse_link, 
+                                     meta={"domain": website.url, 
+                                           "website_id": website.id,
+                                           "product_xpath": product_xpath,
+                                           "ingredient_xpath": ingredient_xpath})
                 page_index += 1
     
     def parse_link(self, response):
@@ -45,11 +48,15 @@ class IncidecoderSpider(scrapy.Spider):
 
         for href in href_list:
             product_url = response.meta.get("domain") + str(href)
-            yield scrapy.Request(url=product_url, callback=self.parse_product, meta={"domain": response.meta.get("domain"), 
-                                                                                     "website_id": response.meta.get("website_id")})
+            yield scrapy.Request(url=product_url, 
+                                 callback=self.parse_product, 
+                                 meta={"domain": response.meta.get("domain"), 
+                                       "website_id": response.meta.get("website_id"),
+                                       "product_xpath": response.meta.get("product_xpath"),
+                                       "ingredient_xpath": response.meta.get("ingredient_xpath")})
 
     def parse_product(self, response: Response, **kwargs: Any):
-        product_xpath = connector.get_product(response.meta.get("website_id"))
+        product_xpath = response.meta.get("product_xpath")
 
         description = response.xpath(product_xpath.description_xpath)
         description_expansion = description.xpath('.//child::*').getall()
@@ -81,11 +88,13 @@ class IncidecoderSpider(scrapy.Spider):
             yield scrapy.Request(url=(response.meta.get("domain") + href), 
                                  callback=self.parse_ingredient, 
                                  meta={"domain": response.meta.get("domain"),
-                                       "website_id": response.meta.get("website_id")})
+                                       "website_id": response.meta.get("website_id"),
+                                       "product_xpath": response.meta.get("product_xpath"),
+                                       "ingredient_xpath": response.meta.get("ingredient_xpath")})
 
 
     def parse_ingredient(self, response: Response, **kwargs: Any):
-        ingredient_xpath = connector.get_ingredient(response.meta.get("website_id"))
+        ingredient_xpath = response.meta.get("ingredient_xpath")
 
         name_dict = json.loads(ingredient_xpath.name_xpath)
 
@@ -120,13 +129,17 @@ class IncidecoderSpider(scrapy.Spider):
                 yield scrapy.Request(url=(response.meta.get("domain") + href), 
                                      callback=self.parse_product, 
                                      meta={"domain": response.meta.get("domain"),
-                                           "website_id": response.meta.get("website_id")})
+                                           "website_id": response.meta.get("website_id"),
+                                           "product_xpath": response.meta.get("product_xpath"),
+                                           "ingredient_xpath": response.meta.get("ingredient_xpath")})
                 
             yield scrapy.Request(url=(response.meta.get("domain") + href + "?uoffset=1"), 
                                      callback=self.parse_product_list_from_ingredient, 
                                      meta={"domain": response.meta.get("domain"),
                                            "website_id": response.meta.get("website_id"),
-                                           "path_to_products": ingredient_xpath.xpath_to_product_list})
+                                           "path_to_products": ingredient_xpath.xpath_to_product_list,
+                                           "product_xpath": response.meta.get("product_xpath"),
+                                           "ingredient_xpath": response.meta.get("ingredient_xpath")})
 
     def parse_product_list_from_ingredient(self, response: Response, **kwargs: Any):
 
@@ -135,14 +148,18 @@ class IncidecoderSpider(scrapy.Spider):
             yield scrapy.Request(url=(response.meta.get("domain") + href), 
                                      callback=self.parse_product, 
                                      meta={"domain": response.meta.get("domain"),
-                                           "website_id": response.meta.get("website_id")})
+                                           "website_id": response.meta.get("website_id"),
+                                           "product_xpath": response.meta.get("product_xpath"),
+                                           "ingredient_xpath": response.meta.get("ingredient_xpath")})
 
         next_page = response.xpath('//a[contains(text(), "Next page")]/@href').get()
         if next_page != None:
             yield scrapy.Request(url=(response.meta.get("domain") + next_page), 
                                      callback=self.parse_product_list_from_ingredient, 
                                      meta={"domain": response.meta.get("domain"),
-                                           "website_id": response.meta.get("website_id")})
+                                           "website_id": response.meta.get("website_id"),
+                                           "product_xpath": response.meta.get("product_xpath"),
+                                           "ingredient_xpath": response.meta.get("ingredient_xpath")})
             
     def clean_ingredient_list_in_product(self, name_list: list):
         result = []
@@ -166,17 +183,4 @@ class IncidecoderSpider(scrapy.Spider):
 
             result.append(name_without_brackets)
 
-        return result
-    
-    def generate_ingredient_id(self, name):
-        result = ""
-
-        for char in name:
-            if 'A' <= char <= 'Z':
-                result += chr(ord(char) + 32)
-            elif char == ' ':
-                result += '-'
-            else:
-                result += char
-        
         return result

@@ -1,175 +1,165 @@
-# from typing import Any
-# import json
-# import scrapy
-# # from ..items import Product, Ingredient
-# from items import Product, Ingredient
-# import re
-# from scrapy.http import Response, TextResponse
+from typing import Any
+import json
+import scrapy
+import re
+from scrapy.http import Response, TextResponse
 
-# class CallMeDuySpider(scrapy.Spider):
-#     name = 'callmeduy'
+from scrapy_crawler.items import Product, Ingredient
+from scrapy_crawler.spiders.base_spider import BaseSpider
 
-#     ingredient_current_position = 0
-#     product_current_position = 0
-#     record_size = 100
+class CallMeDuySpider(BaseSpider):
+    name = 'callmeduy'
+
+    ingredient_current_position = 0
+    product_current_position = 0
+    record_size = 100
     
-#     ingredient_api = "https://callmeduy.com/_api/chemicals/search"
-#     product_api = "https://callmeduy.com/_api/products"
+    ingredient_api = "https://callmeduy.com/_api/chemicals/search"
+    product_api = "https://callmeduy.com/_api/products"
 
-#     header = {
-#         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-#         "Accept-Language": "en-US,en;q=0.9,vi-VN;q=0.8,vi;q=0.7,fr-FR;q=0.6,fr;q=0.5",
-#         "Host": "callmeduy.com",
-#         "Content-Type": "application/json;charset=UTF-8",
-#     }
+    header = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        "Accept-Language": "en-US,en;q=0.9,vi-VN;q=0.8,vi;q=0.7,fr-FR;q=0.6,fr;q=0.5",
+        "Host": "callmeduy.com",
+        "Content-Type": "application/json;charset=UTF-8",
+    }
 
-#     is_end_ingredient = False
-#     is_end_product = False
+    is_end_ingredient = False
+    is_end_product = False
 
-#     def start_requests(self):
-#         while (not self.is_end_ingredient):
-#             yield scrapy.Request(url=self.ingredient_api, 
-#                                  method="POST",
-#                                  body=json.dumps(self.create_ingredient_post_body(start=self.ingredient_current_position, limit=self.record_size)),
-#                                  headers=self.header,
-#                                  callback=self.parse_ingredient)
+    def start_requests(self):
+        while (not self.is_end_ingredient):
+            yield scrapy.Request(url=self.ingredient_api, 
+                                 method="POST",
+                                 body=json.dumps(self.create_ingredient_post_body(start=self.ingredient_current_position, limit=self.record_size)),
+                                 headers=self.header,
+                                 callback=self.parse_ingredient)
             
-#             self.ingredient_current_position += self.record_size
+            self.ingredient_current_position += self.record_size
 
-#         while (not self.is_end_product):
-#             yield scrapy.Request(url=self.make_product_api_with_param(self.product_current_position, self.record_size), 
-#                                  method="GET",
-#                                  headers=self.header,
-#                                  callback=self.parse_product)
+        while (not self.is_end_product):
+            yield scrapy.Request(url=self.make_product_api_with_param(self.product_current_position, self.record_size), 
+                                 method="GET",
+                                 headers=self.header,
+                                 callback=self.parse_product)
             
-#             self.product_current_position += self.record_size
+            self.product_current_position += self.record_size
 
-#     def parse_ingredient(self, response: TextResponse, **kwargs: Any) -> Any:
-#         response_body = json.loads(response.text)
+    def parse_ingredient(self, response: TextResponse, **kwargs: Any) -> Any:
+        response_body = json.loads(response.text)
 
-#         if len(response_body) < 1:
-#             self.is_end_ingredient = True
-#             return
+        if len(response_body) < 1:
+            self.is_end_ingredient = True
+            return
 
-#         for item in response_body:
-#             name_list = set()
-#             for name_item in item["names"]:
-#                 if not ('/' in name_item["name"]):
-#                     name_list.update(self.ingredient_name_clean(name_item["name"].strip()))
+        for item in response_body:
+            name_list = set()
+            for name_item in item["names"]:
+                if not ('/' in name_item["name"]):
+                    name_list.update(self.ingredient_name_clean(name_item["name"].strip()))
 
-#             if len(name_list) < 1:
-#                 continue
+            if len(name_list) < 1:
+                continue
 
-#             scraped_ingredient = Ingredient()
-#             scraped_ingredient["name"] = name_list[0]
-#             scraped_ingredient["id"] = self.generate_ingredient_id(scraped_ingredient["name"])
-#             scraped_ingredient["alias"] = name_list[1:]
-#             scraped_ingredient["url"] = "https://callmeduy.com/thanh-phan"
-#             scraped_ingredient["description"] = self.convert_html_to_text(item["description"]) if item["description"] != None else item["description"]
-#             scraped_ingredient["safe_for_preg"] = item["safetyLevel"] if item["safetyLevel"] != None else -1
-#             scraped_ingredient['is_en'] = False
+            name_list = list(name_list)
 
-#             yield scraped_ingredient
+            scraped_ingredient = Ingredient()
+            scraped_ingredient["name"] = name_list[0]
+            scraped_ingredient["id"] = self.generate_ingredient_id(scraped_ingredient["name"])
+            scraped_ingredient["alias"] = name_list[1:]
+            scraped_ingredient["url"] = "https://callmeduy.com/thanh-phan"
+            scraped_ingredient["description"] = self.convert_html_to_text(item["description"]) if item["description"] != None else item["description"]
+            scraped_ingredient["safe_for_preg"] = item["safetyLevel"] if item["safetyLevel"] != None else -1
+            scraped_ingredient['is_en'] = False
 
-#     def parse_product(self, response: TextResponse, **kwargs: Any) -> Any:
-#         response_body = json.loads(response.text)
+            yield scraped_ingredient
 
-#         if len(response_body) < 1:
-#             self.is_end_product = True
-#             return
+    def parse_product(self, response: TextResponse, **kwargs: Any) -> Any:
+        response_body = json.loads(response.text)
+
+        if len(response_body) < 1:
+            self.is_end_product = True
+            return
         
-#         for item in response_body:
-#             ingredient_list = []
-#             for ingredient_item in item["ingredients"]:
-#                 if len(ingredient_item["names"]) > 0:
-#                     ingredient_list.append(self.ingredient_name_clean_product(ingredient_item["names"][0]["name"]))
+        for item in response_body:
+            ingredient_list = []
+            for ingredient_item in item["ingredients"]:
+                if len(ingredient_item["names"]) > 0:
+                    ingredient_list.append(self.ingredient_name_clean_product(ingredient_item["names"][0]["name"]))
 
-#             scraped_product = Product()
-#             scraped_product['name'] = item["name"].strip()
-#             scraped_product['url'] = "https://callmeduy.com/san-pham/" + str(item["id"])
-#             scraped_product['ingredients'] = ingredient_list
-#             scraped_product['description'] = self.convert_html_to_text(item["description"]) if item["description"] != None else item["description"]
-#             scraped_product['is_en'] = False
+            scraped_product = Product()
+            scraped_product['name'] = item["name"].strip()
+            scraped_product['url'] = "https://callmeduy.com/san-pham/" + str(item["id"])
+            scraped_product['ingredients'] = ingredient_list
+            scraped_product['description'] = self.convert_html_to_text(item["description"]) if item["description"] != None else item["description"]
+            scraped_product['is_en'] = False
 
-#             yield scraped_product
+            yield scraped_product
     
-#     def create_ingredient_post_body(self, start: int, limit: int) -> dict:
-#         return {
-#             "_start": start,
-#             "_limit": limit
-#         }
+    def create_ingredient_post_body(self, start: int, limit: int) -> dict:
+        return {
+            "_start": start,
+            "_limit": limit
+        }
     
-#     def convert_html_to_text(self, html: str) -> str:
-#         return re.sub(r"<[^>]*>", "", html)
+    def convert_html_to_text(self, html: str) -> str:
+        return re.sub(r"<[^>]*>", "", html)
     
-#     def ingredient_name_clean(self, name: str) -> set:
-#         name_without_brackets = ''
-#         name_in_brackets = ''
-#         in_bracket = False
-#         out_bracket_position = -2
+    def ingredient_name_clean(self, name: str) -> set:
+        name_without_brackets = ''
+        name_in_brackets = ''
+        in_bracket = False
+        out_bracket_position = -2
 
-#         other_name = ''
+        other_name = ''
 
-#         for index, char in enumerate(name):
-#             if char == '(':
-#                 in_bracket = True
+        for index, char in enumerate(name):
+            if char == '(':
+                in_bracket = True
 
-#             if ((not in_bracket) and (out_bracket_position != index - 1)):
-#                 name_without_brackets += char
-#             elif in_bracket and char != '(' and char != ')':
-#                 name_in_brackets += char
+            if ((not in_bracket) and (out_bracket_position != index - 1)):
+                name_without_brackets += char
+            elif in_bracket and char != '(' and char != ')':
+                name_in_brackets += char
 
-#             if char == ')':
-#                 in_bracket = False
-#                 out_bracket_position = index
-#                 other_name += (name_in_brackets + name[(index + 1):]) if index < (len(name) - 1) else name_in_brackets
+            if char == ')':
+                in_bracket = False
+                out_bracket_position = index
+                other_name += (name_in_brackets + name[(index + 1):]) if index < (len(name) - 1) else name_in_brackets
 
-#         result = set()
-#         result.add(name_without_brackets.strip())
-#         if other_name != '':
-#             result.add(other_name.strip())
+        result = set()
+        result.add(name_without_brackets.strip())
+        if other_name != '':
+            result.add(other_name.strip())
 
-#         return result
+        return result
     
-#     def make_product_api_with_param(self, start: int, limit: int) -> str:
-#         return self.product_api + f"?_start={start}&_limit={limit}&name_contains=&_sort=created_at:DESC"
+    def make_product_api_with_param(self, start: int, limit: int) -> str:
+        return self.product_api + f"?_start={start}&_limit={limit}&name_contains=&_sort=created_at:DESC"
     
-#     def ingredient_name_clean_product(self, name: str) -> str:
-#         name_without_brackets = ''
-#         in_bracket = False
-#         out_bracket_position = -2
+    def ingredient_name_clean_product(self, name: str) -> str:
+        name_without_brackets = ''
+        in_bracket = False
+        out_bracket_position = -2
 
-#         for index, char in enumerate(name):
-#             if char == '(':
-#                 in_bracket = True
+        for index, char in enumerate(name):
+            if char == '(':
+                in_bracket = True
             
-#             if ((not in_bracket) and (out_bracket_position != index - 1)) or \
-#                 ((out_bracket_position == index - 1) and char != ' '):
-#                 name_without_brackets += char
+            if ((not in_bracket) and (out_bracket_position != index - 1)) or \
+                ((out_bracket_position == index - 1) and char != ' '):
+                name_without_brackets += char
 
-#             if char == ')':
-#                 in_bracket = False
-#                 out_bracket_position = index
+            if char == ')':
+                in_bracket = False
+                out_bracket_position = index
 
-#         result_map = map(str.strip, name_without_brackets.split('/'))
+        result_map = map(str.strip, name_without_brackets.split('/'))
 
-#         max_length_item = ''
-#         for item in result_map:
-#             if len(item) > len(max_length_item):
-#                 max_length_item = item
+        max_length_item = ''
+        for item in result_map:
+            if len(item) > len(max_length_item):
+                max_length_item = item
         
-#         return max_length_item
-    
-#     def generate_ingredient_id(self, name):
-#         result = ""
-
-#         for char in name:
-#             if 'A' <= char <= 'Z':
-#                 result += chr(ord(char) + 32)
-#             elif char == ' ':
-#                 result += '-'
-#             else:
-#                 result += char
-        
-#         return result
+        return max_length_item
 
