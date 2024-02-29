@@ -5,9 +5,12 @@ import re
 # from db_connector import connector
 # from db_connector import constants
 # from items import Product, Ingredient
-from ..db_connector import connector
-from ..db_connector import constants
-from ..items import Product, Ingredient
+# from ..db_connector import connector
+# from ..db_connector import constants
+# from ..items import Product, Ingredient
+from scrapy_crawler.db_connector import connector
+from scrapy_crawler.db_connector import constants
+from scrapy_crawler.items import Product, Ingredient
 
 from scrapy.http import Request, Response
 
