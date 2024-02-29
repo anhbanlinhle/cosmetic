@@ -2,6 +2,8 @@ from elasticsearch import Elasticsearch
 import os
 from dotenv import load_dotenv
 
+from items import Product, Ingredient
+
 load_dotenv()
 
 ADDRESS = os.getenv('ELASTICSEARCH_ADDRESS')
@@ -15,7 +17,7 @@ class ElasticsearchService:
         basic_auth=(USER, PASSWORD)
     )
 
-    def search_ingredient_in_index(self, name: str | list[str], index: str) -> dict:
+    def search_ingredient_in_index(self, name: str | list[str], index: str) -> Ingredient:
         if name == None or index == None:
             raise Exception("name and index must not be null")
 
