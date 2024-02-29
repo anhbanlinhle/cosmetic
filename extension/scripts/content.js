@@ -19,11 +19,11 @@ getTextNodes(body);
 
 function checkWordImportance(word) {
   if (word === "Sữa Rửa Mặt Dr.G pH Cleansing Gel Foam 200ml") {
-    return "red";
+    return "#ff173e";
   } else if (word === "Kem Chống Nắng Nature Republic California Aloe Daily Sun Block SPF50+PA++++ 57ml") {
-    return "yellow";
+    return "#ffee03";
   } else if (word === "Mặt Nạ Celderma Crystal Skin Mask 23g") {
-    return "green";
+    return "#1cff03";
   } else {
     return "none";
   }
@@ -36,10 +36,12 @@ for (const textNode of textNodes) {
   const color = checkWordImportance(originalText);
 
   if (color !== "none") {
-    const newSpan = document.createElement("span");
-    newSpan.style.backgroundColor = color;
-    newSpan.textContent = originalText;
-    coloredWords.push(newSpan);
+    const cosmeticName = document.createElement("span");
+    cosmeticName.style.backgroundColor = color;
+    cosmeticName.style.color = "black";
+    cosmeticName.textContent = originalText;
+
+    coloredWords.push(cosmeticName);
   }
   else {
     coloredWords.push(document.createTextNode(originalText));
