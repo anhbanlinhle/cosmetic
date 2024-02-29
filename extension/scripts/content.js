@@ -37,7 +37,7 @@ for (const textNode of textNodes) {
 
   if (color !== "none") {
     const newSpan = document.createElement("span");
-    newSpan.style.color = color;
+    newSpan.style.backgroundColor = color;
     newSpan.textContent = originalText;
     coloredWords.push(newSpan);
   }
