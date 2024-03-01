@@ -2,7 +2,7 @@ from elasticsearch import Elasticsearch
 import os
 from dotenv import load_dotenv
 
-from items import Product, Ingredient
+from scrapy_crawler.items import Product, Ingredient
 
 load_dotenv()
 
