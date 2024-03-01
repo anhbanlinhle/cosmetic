@@ -63,16 +63,16 @@ class CallMeDuySpider(BaseSpider):
 
             name_list = list(name_list)
 
-            scraped_ingredient = Ingredient()
-            scraped_ingredient["name"] = name_list[0]
-            scraped_ingredient["id"] = self.generate_ingredient_id(scraped_ingredient["name"])
-            scraped_ingredient["alias"] = name_list[1:]
-            scraped_ingredient["url"] = "https://callmeduy.com/thanh-phan"
-            scraped_ingredient["description"] = self.convert_html_to_text(item["description"]) if item["description"] != None else item["description"]
-            scraped_ingredient["safe_for_preg"] = item["safetyLevel"] if item["safetyLevel"] != None else -1
-            scraped_ingredient['is_en'] = False
+            scraped_ingredient = self.make_ingredient(id=self.generate_record_id(name_list[0]),
+                                                      document=None,
+                                                      name=name_list[0],
+                                                      alias=name_list[1:],
+                                                      url="https://callmeduy.com/thanh-phan",
+                                                      description=self.convert_html_to_text(item["description"]) if item["description"] != None else item["description"],
+                                                      safe_for_preg=item["safetyLevel"] if item["safetyLevel"] != None else -1,
+                                                      is_en=False)
 
-            yield scraped_ingredient
+            yield self.make_final_result(scraped_ingredient)
 
     def parse_product(self, response: TextResponse, **kwargs: Any) -> Any:
         response_body = json.loads(response.text)
@@ -87,14 +87,15 @@ class CallMeDuySpider(BaseSpider):
                 if len(ingredient_item["names"]) > 0:
                     ingredient_list.append(self.ingredient_name_clean_product(ingredient_item["names"][0]["name"]))
 
-            scraped_product = Product()
-            scraped_product['name'] = item["name"].strip()
-            scraped_product['url'] = "https://callmeduy.com/san-pham/" + str(item["id"])
-            scraped_product['ingredients'] = ingredient_list
-            scraped_product['description'] = self.convert_html_to_text(item["description"]) if item["description"] != None else item["description"]
-            scraped_product['is_en'] = False
+            stripped_name = item["name"].strip()
+            scraped_product = self.make_product(id=self.generate_record_id(stripped_name),
+                                                name=stripped_name,
+                                                ingredients=ingredient_list,
+                                                description=self.convert_html_to_text(item["description"]) if item["description"] != None else item["description"],
+                                                url=response.url,
+                                                is_en=False)
 
-            yield scraped_product
+            yield self.make_final_result(scraped_product)
     
     def create_ingredient_post_body(self, start: int, limit: int) -> dict:
         return {

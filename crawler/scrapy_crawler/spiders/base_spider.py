@@ -1,4 +1,5 @@
 from typing import Any
+from unidecode import unidecode
 import scrapy
 from scrapy_crawler.db_connector import connector
 from scrapy_crawler.db_connector import constants
@@ -25,10 +26,12 @@ class BaseSpider(scrapy.Spider):
     def parse_ingredient(self, response: Response, **kwargs: Any):
         pass
 
-    def generate_ingredient_id(self, name):
+    def generate_record_id(self, name):
+
+        normalized_name = unidecode(name, "utf-8")
         result = ""
 
-        for char in name:
+        for char in normalized_name:
             if 'A' <= char <= 'Z':
                 result += chr(ord(char) + 32)
             elif char == ' ':
@@ -86,7 +89,7 @@ class BaseSpider(scrapy.Spider):
         scraped_product = Product()
         scraped_product['id'] = id
         scraped_product['name'] = name
-        scraped_product['url'] = list(url) if isinstance(url, str) else url
+        scraped_product['url'] = [url] if isinstance(url, str) else url
         scraped_product['ingredients'] = ingredients
         scraped_product['description'] = { f'{url}': description } if isinstance(description, str) else description
         scraped_product['is_en'] = is_en
@@ -100,7 +103,7 @@ class BaseSpider(scrapy.Spider):
         scraped_ingredient["name"] = name
         scraped_ingredient["alias"] = alias
         scraped_ingredient["document"] = document if document != None else []
-        scraped_ingredient["url"] = list(url) if isinstance(url, str) else url
+        scraped_ingredient["url"] = [url] if isinstance(url, str) else url
         scraped_ingredient["description"] = { f'{url}': description } if isinstance(description, str) else description
         scraped_ingredient["safe_for_preg"] = { f'{url}': safe_for_preg } if isinstance(safe_for_preg, int) else safe_for_preg
         scraped_ingredient['is_en'] = is_en
