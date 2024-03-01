@@ -113,7 +113,7 @@ class IncidecoderSpider(BaseSpider):
 
         scraped_ingredient = Ingredient()
         scraped_ingredient["name"] = response.xpath(name_dict["name"] + "//text()").get().strip()
-        scraped_ingredient["id"] = self.generate_ingredient_id(scraped_ingredient["name"])
+        scraped_ingredient["id"] = self.generate_record_id(scraped_ingredient["name"])
         scraped_ingredient["alias"] = list(name_alias_list)
         scraped_ingredient["description"] = re.sub(r"(?<=[a-zA-Z])[\n\t\r]", " ", description_paragraph)
         scraped_ingredient["document"] = document

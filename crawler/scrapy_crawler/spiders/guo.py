@@ -136,7 +136,7 @@ class GuoSpider(BaseSpider):
 
         scraped_ingredient = Ingredient()
         scraped_ingredient["name"] = name_list[0]
-        scraped_ingredient["id"] = self.generate_ingredient_id(scraped_ingredient["name"])
+        scraped_ingredient["id"] = self.generate_record_id(scraped_ingredient["name"])
         scraped_ingredient["alias"] = name_list[1:]
         scraped_ingredient["url"] = response.url
         scraped_ingredient["description"] = description if description != None else ""
