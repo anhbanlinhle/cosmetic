@@ -11,6 +11,7 @@ class BaseSpider(scrapy.Spider):
 
     es_service_instance = ElasticsearchService()
     INGREDIENT_INDEX = 'test-2'
+    PRODUCT_INDEX = 'test-2'
 
     def start_requests(self):
         pass
@@ -74,11 +75,12 @@ class BaseSpider(scrapy.Spider):
             existing_ingre["safe_for_preg"].update(scraped_ingredient["safe_for_preg"])
 
             return existing_ingre
+        
         else:
             return scraped_ingredient
 
     def check_exist_product(self, product: Product) -> Product:
-        pass
+        return product;
     
     def make_product(self, id: str, name: str, description: str | dict | None, url: str | list[str], ingredients: list[str], is_en: bool):
         scraped_product = Product()
