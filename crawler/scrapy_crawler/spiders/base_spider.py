@@ -49,7 +49,7 @@ class BaseSpider(scrapy.Spider):
             return self.check_exist_product(record)
 
     def check_exist_ingredient(self, scraped_ingredient: Ingredient) -> Ingredient:
-        full_list_name = scraped_ingredient["alias"]
+        full_list_name = list(scraped_ingredient["alias"])
         full_list_name.append(scraped_ingredient["name"])
 
         existing_ingre = self.es_service_instance.search_ingredient_in_index(name=full_list_name, index=self.INGREDIENT_INDEX)

@@ -95,7 +95,17 @@ class GuoSpider(BaseSpider):
                 ingredient['name'] = name_list[0]
                 ingredient['alias'] = name_list[1:]
                 ingredient['safe_for_preg'] = preg_safe
-                yield ingredient
+
+                scraped_ingredient = self.make_ingredient(id=self.generate_record_id(name_list[0]),
+                                                            document=None,
+                                                            name=name_list[0],
+                                                            alias=name_list[1:],
+                                                            url=response.url,
+                                                            description=None,
+                                                            safe_for_preg=preg_safe,
+                                                            is_en=False)
+                
+                yield self.make_final_result(scraped_ingredient)
 
     def parse_product(self, response: Response, **kwargs: Any):
         product_xpath = response.meta.get("obj_xpath")
@@ -107,17 +117,19 @@ class GuoSpider(BaseSpider):
                 merged_description += des
             merged_description.strip()
         
-        ingredient_list = response.xpath(product_xpath.x_path_to_ingredient_list + "//text()").get().strip()
+        ingredient_list = response.xpath(product_xpath.x_path_to_ingredient_list + "//text()").get().strip().split(", ")
+        ingredient_list[len(ingredient_list) - 1] = ingredient_list[len(ingredient_list) - 1].replace(".", "")
 
-        scraped_product = Product()
-        scraped_product['name'] = response.xpath(product_xpath.name_xpath + "//text()").get().strip()
-        scraped_product['url'] = response.url
-        scraped_product['ingredients'] = ingredient_list.split(", ")
-        scraped_product['ingredients'][len(scraped_product['ingredients']) - 1] = scraped_product['ingredients'][len(scraped_product['ingredients']) - 1].replace(".", "")
-        scraped_product['description'] = merged_description
-        scraped_product['is_en'] = False
+        product_name = response.xpath(product_xpath.name_xpath + "//text()").get().strip()
 
-        yield scraped_product
+        scraped_product = self.make_product(id=self.generate_record_id(product_name),
+                                                name=product_name,
+                                                ingredients=ingredient_list,
+                                                description=merged_description,
+                                                url=response.url,
+                                                is_en=False)
+
+        yield self.make_final_result(scraped_product)
 
     def parse_ingredient(self, response: Response, **kwargs: Any):
         ingredient_xpath = response.meta.get("obj_xpath")
@@ -134,16 +146,16 @@ class GuoSpider(BaseSpider):
 
         name_list = self.ingredient_phase_name_clean(name.strip())
 
-        scraped_ingredient = Ingredient()
-        scraped_ingredient["name"] = name_list[0]
-        scraped_ingredient["id"] = self.generate_record_id(scraped_ingredient["name"])
-        scraped_ingredient["alias"] = name_list[1:]
-        scraped_ingredient["url"] = response.url
-        scraped_ingredient["description"] = description if description != None else ""
-        scraped_ingredient["safe_for_preg"] = safe_for_preg if safe_for_preg != None else -1
-        scraped_ingredient['is_en'] = False
+        scraped_ingredient = self.make_ingredient(id=self.generate_record_id(name_list[0]),
+                                                document=None,
+                                                name=name_list[0],
+                                                alias=name_list[1:],
+                                                url=response.url,
+                                                description=(description if description != None else None),
+                                                safe_for_preg=(safe_for_preg if safe_for_preg != None else -1),
+                                                is_en=False)
         
-        yield scraped_ingredient
+        yield self.make_final_result(scraped_ingredient)
 
         ingredient_navigate = response.xpath('//body//*[contains(@id, "nav")]//a[contains(@href, "/thanh-phan")]/@href').getall()
         for href in ingredient_navigate:
