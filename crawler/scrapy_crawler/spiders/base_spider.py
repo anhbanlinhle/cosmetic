@@ -35,7 +35,8 @@ class BaseSpider(scrapy.Spider):
             if 'A' <= char <= 'Z':
                 result += chr(ord(char) + 32)
             elif char == ' ':
-                result += '-'
+                if result[len(result) - 1] != '-':
+                    result += '-'
             else:
                 result += char
         
