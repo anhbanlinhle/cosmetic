@@ -72,17 +72,18 @@ class IncidecoderSpider(BaseSpider):
 
         cleaned_ingredient_list = self.clean_ingredient_list_in_product(ingredient_list_name)
 
-        scraped_product = Product()
-        scraped_product['name'] = response.xpath(product_xpath.brand_xpath + "//text()").get().strip() + " " + response.xpath(product_xpath.name_xpath + "//text()").get().strip()
-        scraped_product['url'] = response.url
+        product_name = response.xpath(product_xpath.brand_xpath + "//text()").get().strip() + " " + response.xpath(product_xpath.name_xpath + "//text()").get().strip()
+        product_description = merged_description if len(description_expansion) > 0 else description.xpath('./text()').get().strip()
+        product_description = re.sub(r"(?<=[a-zA-Z])[\n\t\r]", " ", product_description)
 
-        scraped_product['description'] = merged_description if len(description_expansion) > 0 else description.xpath('./text()').get().strip()
-        scraped_product['description'] = re.sub(r"(?<=[a-zA-Z])[\n\t\r]", " ", scraped_product['description'])
+        scraped_product = self.make_product(id=self.generate_record_id(product_name),
+                                                name=product_name,
+                                                ingredients=cleaned_ingredient_list,
+                                                description=(product_description if product_description != '' else None),
+                                                url=response.url,
+                                                is_en=True)
 
-        scraped_product['ingredients'] = cleaned_ingredient_list
-        scraped_product['is_en'] = True
-
-        yield scraped_product
+        yield self.make_final_result(scraped_product)
 
         for href in ingredient_list_href:
             yield scrapy.Request(url=(response.meta.get("domain") + href), 
@@ -111,17 +112,19 @@ class IncidecoderSpider(BaseSpider):
         for content in description:
             description_paragraph += (content.strip() + '\n')
 
-        scraped_ingredient = Ingredient()
-        scraped_ingredient["name"] = response.xpath(name_dict["name"] + "//text()").get().strip()
-        scraped_ingredient["id"] = self.generate_record_id(scraped_ingredient["name"])
-        scraped_ingredient["alias"] = list(name_alias_list)
-        scraped_ingredient["description"] = re.sub(r"(?<=[a-zA-Z])[\n\t\r]", " ", description_paragraph)
-        scraped_ingredient["document"] = document
-        scraped_ingredient["safe_for_preg"] = -1
-        scraped_ingredient["url"] = response.url
-        scraped_ingredient['is_en'] = True
+        ingredient_name = response.xpath(name_dict["name"] + "//text()").get().strip()
+        ingredient_description = re.sub(r"(?<=[a-zA-Z])[\n\t\r]", " ", description_paragraph)
 
-        yield scraped_ingredient
+        scraped_ingredient = self.make_ingredient(id=self.generate_record_id(ingredient_name),
+                                                    document=document,
+                                                    name=ingredient_name,
+                                                    alias=list(name_alias_list),
+                                                    url=response.url,
+                                                    description=(ingredient_description if ingredient_description != '' else None),
+                                                    safe_for_preg=(-1),
+                                                    is_en=True)
+
+        yield self.make_final_result(scraped_ingredient)
 
         product_href_list = response.xpath(ingredient_xpath.xpath_to_product_list + '/@href').getall()
         if len(product_href_list) > 0:
