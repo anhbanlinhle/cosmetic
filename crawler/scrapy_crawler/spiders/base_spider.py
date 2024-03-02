@@ -11,8 +11,8 @@ from scrapy.http import Request, Response
 class BaseSpider(scrapy.Spider):
 
     es_service_instance = ElasticsearchService()
-    INGREDIENT_INDEX = 'test-2'
-    PRODUCT_INDEX = 'test-2'
+    INGREDIENT_INDEX = 'test-3'
+    PRODUCT_INDEX = 'test-3'
 
     def start_requests(self):
         pass
