@@ -1,6 +1,0 @@
-transformers
-tensorflow
-torch
-torchaudio
-jupyter
-torchvision
