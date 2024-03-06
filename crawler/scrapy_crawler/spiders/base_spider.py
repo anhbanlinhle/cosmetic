@@ -52,7 +52,7 @@ class BaseSpider(scrapy.Spider):
         full_list_name = list(scraped_ingredient["alias"])
         full_list_name.append(scraped_ingredient["name"])
 
-        existing_ingre = self.es_service_instance.match_phrase_ingredient_in_index(name=full_list_name, index=self.INGREDIENT_INDEX)
+        existing_ingre = self.es_service_instance.exact_match_ingredient_in_index(name=full_list_name, index=self.INGREDIENT_INDEX)
 
         if existing_ingre != None:
             # handle name and alias
