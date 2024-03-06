@@ -107,7 +107,7 @@ class EwgSpider(BaseSpider):
 
         scraped_ingredient = self.make_ingredient(id=self.generate_record_id(ingredient_name),
                                                     document=None,
-                                                    name=ingredient_name,
+                                                    name=self.get_name_without_brackets(ingredient_name),
                                                     alias=aliases,
                                                     url=response.url,
                                                     description=description.strip() if description != None else None,
