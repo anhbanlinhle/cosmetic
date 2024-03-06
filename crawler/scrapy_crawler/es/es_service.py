@@ -69,6 +69,34 @@ class ElasticsearchService:
         else:
             return None
 
+    def exact_match_product_in_index(self, name: str, index: str) -> Ingredient:
+        if name == None or index == None:
+            raise Exception("name and index must not be null")
+
+        query = {
+            "bool": {
+                "filter": [
+                    {
+                        "term": {
+                            "alias.keyword": str.lower(name)
+                        }
+                    }
+                ]
+            }
+        }
+                
+        res = self.client.search(
+            index=index, 
+            query=query,
+            source_excludes=[ "@version", "event", "@timestamp" ],
+            sort=[{ "@timestamp" : "asc" }]
+        )
+        
+        if len(res["hits"]["hits"]) > 0:
+            return res["hits"]["hits"][0]["_source"]
+        else:
+            return None
+
     def _generate_ingredient_multi_match_query(self, name: str) -> dict:
         return {
             "multi_match": {
@@ -89,15 +117,16 @@ class ElasticsearchService:
             return result
 
     def _generate_keyword_term_name_alias(self, name: str):
+        lowercased_name = str.lower(name)
         return [
             {
                 "term": {
-                    "alias.keyword": name
+                    "alias.keyword": lowercased_name
                 }
             },
             {
                 "term": {
-                    "name.keyword": name
+                    "name.keyword": lowercased_name
                 }
             }
         ]

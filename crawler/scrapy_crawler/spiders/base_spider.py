@@ -77,14 +77,29 @@ class BaseSpider(scrapy.Spider):
 
             # handle safe_for_preg
             existing_ingre["safe_for_preg"].update(scraped_ingredient["safe_for_preg"])
+            existing_ingre["is_en"] = scraped_ingredient["is_en"]
 
             return existing_ingre
         
         else:
             return scraped_ingredient
 
-    def check_exist_product(self, product: Product) -> Product:
-        return product;
+    def check_exist_product(self, scraped_product: Product) -> Product:
+        existing_product = self.es_service_instance.exact_match_product_in_index(name=scraped_product["name"], index=self.INGREDIENT_INDEX)
+
+        if existing_product != None:
+
+            if scraped_product.get("description") != None and existing_product.get("description") == None:
+                existing_product["description"] = scraped_product["description"]
+            elif scraped_product.get("description") != None and existing_product.get("description") != None:
+                existing_product["description"].update(scraped_product["description"])
+
+            existing_product["url"] = existing_product["url"] + scraped_product["url"]
+            existing_product["is_en"] = scraped_product["is_en"]
+
+            return existing_product
+        else:
+            return scraped_product;
     
     def make_product(self, id: str, name: str, description: str | dict | None, url: str | list[str], ingredients: list[str], is_en: bool):
         scraped_product = Product()
