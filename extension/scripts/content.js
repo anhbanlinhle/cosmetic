@@ -57,3 +57,42 @@ for (const textNode of textNodes) {
   combinedContent.append(...coloredWords);
   textNode.parentNode.replaceChild(combinedContent, textNode);
 }
+
+let selectedText = "";
+
+document.addEventListener('mouseup', (event) => {
+  selectedText = window.getSelection().toString();
+});
+
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message.message === "trigger_search") {
+    console.log(selectedText);
+    if (selectedText.length > 0) {
+      fetch('http://localhost:9200/test-2/_search', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Basic ZWxhc3RpYzpjaGFuZ2VtZQ=='
+      },
+      body: JSON.stringify({
+        "query": {
+            "match": {
+                "name": {
+                    "query": selectedText
+                }
+            }
+        }
+      })
+    })
+    .then(response => response.json())
+    .then(data => {
+      // Handle the search response data here
+      console.log(data);
+    })
+    .catch(error => {
+      console.error(error);
+    });
+    }
+    selectedText = ""; // Reset selected text
+  }
+});
