@@ -37,7 +37,7 @@ class ElasticsearchService:
             index=index, 
             query=query,
             source_excludes=[ "@version", "event", "@timestamp" ],
-            sort=[{ "@timestamp" : "asc" }]
+            sort=[{ "_score": "desc", "@timestamp" : "asc" }]
         )
         
         if len(res["hits"]["hits"]) > 0:
