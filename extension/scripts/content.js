@@ -1,4 +1,8 @@
 const body = document.querySelector("body");
+const RED = "#ff4a4d";
+const ORANGE = "#ffee03";
+const YELLOW = "#1cff03";
+const GREEN = "#ff792b";
 
 function trimWord(word) {
   return word.trim();
@@ -18,12 +22,14 @@ function getTextNodes(element) {
 getTextNodes(body);
 
 function checkWordImportance(word) {
-  if (word === "Sữa Rửa Mặt Dr.G pH Cleansing Gel Foam 200ml") {
-    return "#ff173e";
+  if (word === "Kem Chống Nắng Nature Republic Nâng Tone Tự Nhiên 57ml") {
+    return RED;
   } else if (word === "Kem Chống Nắng Nature Republic California Aloe Daily Sun Block SPF50+PA++++ 57ml") {
-    return "#ffee03";
+    return ORANGE;
   } else if (word === "Mặt Nạ Celderma Crystal Skin Mask 23g") {
-    return "#1cff03";
+    return YELLOW;
+  } else if (word === "Alexei Navalny") {
+    return GREEN;
   } else {
     return "none";
   }
