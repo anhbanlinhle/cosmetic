@@ -99,9 +99,9 @@ class EwgSpider(BaseSpider):
 
         name_dict = json.loads(ingredient_xpath.name_xpath)
 
-        ingredient_name = str.lower(response.xpath(name_dict["name"] + "//text()").get().strip())
+        ingredient_name = response.xpath(name_dict["name"] + "//text()").get().strip()
         alias_list = response.xpath(name_dict["alias"] + "//text()").getall()
-        aliases = [str.lower((alias_list[index].strip())[2:]) for index in range(len(alias_list))]
+        aliases = [(alias_list[index].strip())[2:] for index in range(len(alias_list))]
 
         description = response.xpath(ingredient_xpath.description_xpath + "//text()").get()
 

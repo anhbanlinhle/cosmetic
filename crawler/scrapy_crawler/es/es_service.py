@@ -17,7 +17,7 @@ class ElasticsearchService:
         basic_auth=(USER, PASSWORD)
     )
 
-    def search_ingredient_in_index(self, name: str | list[str], index: str) -> Ingredient:
+    def match_phrase_ingredient_in_index(self, name: str | list[str], index: str) -> Ingredient:
         if name == None or index == None:
             raise Exception("name and index must not be null")
 
