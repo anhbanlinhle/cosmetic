@@ -1,15 +1,9 @@
-const body = document.querySelector("body");
 const RED = "#ff4a4d";
 const ORANGE = "#ffee03";
 const YELLOW = "#1cff03";
 const GREEN = "#ff792b";
 
-function trimWord(word) {
-  return word.trim();
-}
-
-const textNodes = [];
-function getTextNodes(element) {
+let getTextNodes = (element) => {
   for (const child of element.childNodes) {
     if (child.nodeType === Node.TEXT_NODE) {
       textNodes.push(child);
@@ -19,9 +13,7 @@ function getTextNodes(element) {
   }
 }
 
-getTextNodes(body);
-
-function checkWordImportance(word) {
+let checkWordImportance = (word) => {
   if (word === "Kem Chống Nắng Nature Republic Nâng Tone Tự Nhiên 57ml") {
     return RED;
   } else if (word === "Kem Chống Nắng Nature Republic California Aloe Daily Sun Block SPF50+PA++++ 57ml") {
@@ -34,6 +26,10 @@ function checkWordImportance(word) {
     return "none";
   }
 }
+
+const textNodes = [];
+const body = document.querySelector("body");
+getTextNodes(body);
 
 for (const textNode of textNodes) {
   let originalText = textNode.textContent;
@@ -78,7 +74,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         "query": {
             "match": {
                 "name": {
-                    "query": selectedText
+                    "query": selectedText,
+                    "minimum_should_match": "70%"
                 }
             }
         }
@@ -86,13 +83,12 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     })
     .then(response => response.json())
     .then(data => {
-      // Handle the search response data here
-      console.log(data);
+      console.log(data.hits.hits[0]._source.safe_for_preg);
     })
     .catch(error => {
       console.error(error);
     });
     }
-    selectedText = ""; // Reset selected text
+    selectedText = "";
   }
 });
