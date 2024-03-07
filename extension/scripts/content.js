@@ -27,26 +27,34 @@ let checkWordImportance = (word) => {
   }
 }
 
+let paragraphToWords = (paragraph) => {
+  const regex = /(?<!\w\.\w.)(?<![A-Z][a-z]\.)(?<=\.|\?)\s/;
+  return paragraph.split(regex);
+}
+
 const textNodes = [];
 const body = document.querySelector("body");
 getTextNodes(body);
 
 for (const textNode of textNodes) {
-  let originalText = textNode.textContent;
+  let originalText = paragraphToWords(textNode.textContent);
+
   const coloredWords = [];
 
-  const color = checkWordImportance(originalText);
+  for (const word of originalText) {
+    const color = checkWordImportance(word);
 
-  if (color !== "none") {
-    const cosmeticName = document.createElement("span");
-    cosmeticName.style.backgroundColor = color;
-    cosmeticName.style.color = "black";
-    cosmeticName.textContent = originalText;
+    if (color !== "none") {
+      const cosmeticName = document.createElement("span");
+      cosmeticName.style.backgroundColor = color;
+      cosmeticName.style.color = "black";
+      cosmeticName.textContent = word + ' ';
 
-    coloredWords.push(cosmeticName);
-  }
-  else {
-    coloredWords.push(document.createTextNode(originalText));
+      coloredWords.push(cosmeticName);
+    }
+    else {
+      coloredWords.push(document.createTextNode(word + ' '));
+    }
   }
 
   const combinedContent = document.createDocumentFragment();
