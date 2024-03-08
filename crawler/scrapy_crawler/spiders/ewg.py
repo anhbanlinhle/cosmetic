@@ -12,6 +12,10 @@ from scrapy_crawler.spiders.base_spider import BaseSpider
 class EwgSpider(BaseSpider):
     name = 'ewg'
 
+    custom_settings = {
+        "DOWNLOAD_DELAY": 0.8
+    }
+
     vowel_list = {'u', 'e', 'o', 'a', 'i', 'y'}
 
     end_of_product = False
