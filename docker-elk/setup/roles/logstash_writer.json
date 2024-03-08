@@ -32,7 +32,9 @@
     {
       "names": [
         "cosmetic",
-        "test-*"
+        "test-*",
+        "ingredient-*",
+        "product-*"
       ],
       "privileges": [
         "write",
