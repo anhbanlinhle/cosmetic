@@ -11,8 +11,8 @@ from scrapy.http import Request, Response
 class BaseSpider(scrapy.Spider):
 
     es_service_instance = ElasticsearchService()
-    INGREDIENT_INDEX = 'test-3'
-    PRODUCT_INDEX = 'test-3'
+    INGREDIENT_INDEX = 'ingredient-v3'
+    PRODUCT_INDEX = 'product-v3'
 
     def start_requests(self):
         pass
@@ -101,18 +101,19 @@ class BaseSpider(scrapy.Spider):
         else:
             return scraped_product;
     
-    def make_product(self, id: str, name: str, description: str | dict | None, url: str | list[str], ingredients: list[str], is_en: bool):
+    def make_product(self, id: str, name: str, description: str | dict | None,  spider_name: str,
+                     url: str | list[str], ingredients: list[str], is_en: bool):
         scraped_product = Product()
         scraped_product['id'] = id
         scraped_product['name'] = name
         scraped_product['url'] = [url] if isinstance(url, str) else url
         scraped_product['ingredients'] = ingredients
-        scraped_product['description'] = { f'{url}': description } if isinstance(description, str) else description
+        scraped_product['description'] = { f'{spider_name}': description } if isinstance(description, str) else description
         scraped_product['is_en'] = is_en
 
         return scraped_product
     
-    def make_ingredient(self, id: str, name: str, alias: list[str], document: list[str] | None, 
+    def make_ingredient(self, id: str, name: str, alias: list[str], document: list[str] | None, spider_name: str,
                         safe_for_preg: int | dict, description: str | dict | None, url: str | list[str], is_en: bool):
         scraped_ingredient = Ingredient()
         scraped_ingredient["id"] = id
@@ -120,8 +121,8 @@ class BaseSpider(scrapy.Spider):
         scraped_ingredient["alias"] = alias
         scraped_ingredient["document"] = document if document != None else []
         scraped_ingredient["url"] = [url] if isinstance(url, str) else url
-        scraped_ingredient["description"] = { f'{url}': description } if isinstance(description, str) else description
-        scraped_ingredient["safe_for_preg"] = { f'{url}': safe_for_preg } if isinstance(safe_for_preg, int) else safe_for_preg
+        scraped_ingredient["description"] = { f'{spider_name}': description } if isinstance(description, str) else description
+        scraped_ingredient["safe_for_preg"] = { f'{spider_name}': safe_for_preg } if isinstance(safe_for_preg, int) else safe_for_preg
         scraped_ingredient['is_en'] = is_en
 
         return scraped_ingredient

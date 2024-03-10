@@ -94,6 +94,7 @@ class EwgSpider(BaseSpider):
                                                 ingredients=ingredient_list,
                                                 description=description,
                                                 url=response.url,
+                                                spider_name=self.name,
                                                 is_en=True)
 
         yield self.make_final_result(scraped_product)
@@ -116,6 +117,7 @@ class EwgSpider(BaseSpider):
                                                     url=response.url,
                                                     description=description.strip() if description != None else None,
                                                     safe_for_preg=(-1),
+                                                    spider_name=self.name,
                                                     is_en=True)
 
         yield self.make_final_result(scraped_ingredient)

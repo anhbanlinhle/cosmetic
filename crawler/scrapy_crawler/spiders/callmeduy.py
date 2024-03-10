@@ -70,6 +70,7 @@ class CallMeDuySpider(BaseSpider):
                                                       url="https://callmeduy.com/thanh-phan",
                                                       description=self.convert_html_to_text(item["description"]) if item["description"] != None else item["description"],
                                                       safe_for_preg=item["safetyLevel"] if item["safetyLevel"] != None else -1,
+                                                      spider_name=self.name,
                                                       is_en=False)
 
             yield self.make_final_result(scraped_ingredient)
@@ -93,6 +94,7 @@ class CallMeDuySpider(BaseSpider):
                                                 ingredients=ingredient_list,
                                                 description=self.convert_html_to_text(item["description"]) if item["description"] != None else item["description"],
                                                 url=response.url,
+                                                spider_name=self.name,
                                                 is_en=False)
 
             yield self.make_final_result(scraped_product)
