@@ -2,7 +2,9 @@
   "cluster": [
     "manage_index_templates",
     "monitor",
-    "manage_ilm"
+    "manage_ilm",
+    "manage",
+    "all"
   ],
   "indices": [
     {
@@ -34,7 +36,8 @@
         "cosmetic",
         "test-*",
         "ingredient-*",
-        "product-*"
+        "product-*",
+        "err-*"
       ],
       "privileges": [
         "write",
