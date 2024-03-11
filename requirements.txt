@@ -2,3 +2,6 @@ scrapy
 mysql-connector-python
 python-dotenv
 kafka-python
+Faker
+elasticsearch
+elasticsearch[async]
