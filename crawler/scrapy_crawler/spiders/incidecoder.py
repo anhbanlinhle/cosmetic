@@ -81,6 +81,7 @@ class IncidecoderSpider(BaseSpider):
                                                 ingredients=cleaned_ingredient_list,
                                                 description=(product_description if product_description != '' else None),
                                                 url=response.url,
+                                                spider_name=self.name,
                                                 is_en=True)
 
         yield self.make_final_result(scraped_product)
@@ -122,6 +123,7 @@ class IncidecoderSpider(BaseSpider):
                                                     url=response.url,
                                                     description=(ingredient_description if ingredient_description != '' else None),
                                                     safe_for_preg=(-1),
+                                                    spider_name=self.name,
                                                     is_en=True)
 
         yield self.make_final_result(scraped_ingredient)
