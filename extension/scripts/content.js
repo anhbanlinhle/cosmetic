@@ -44,7 +44,7 @@ for (const textNode of textNodes) {
   for (const word of originalText) {
     const color = checkWordImportance(word);
 
-    if (color !== "none") {
+    if (color !== "none") {   
       const cosmeticName = document.createElement("span");
       cosmeticName.style.backgroundColor = color;
       cosmeticName.style.color = "black";
@@ -68,35 +68,35 @@ document.addEventListener('mouseup', (event) => {
   selectedText = window.getSelection().toString();
 });
 
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
   if (message.message === "trigger_search") {
     console.log(selectedText);
     if (selectedText.length > 0) {
-      fetch('http://localhost:9200/test-2/_search', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Basic ZWxhc3RpYzpjaGFuZ2VtZQ=='
-      },
-      body: JSON.stringify({
-        "query": {
-            "match": {
-                "name": {
-                    "query": selectedText,
-                    "minimum_should_match": "70%"
-                }
-            }
-        }
-      })
-    })
-    .then(response => response.json())
-    .then(data => {
-      console.log(data.hits.hits[0]._source.safe_for_preg);
-    })
-    .catch(error => {
-      console.error(error);
-    });
+      response = await queryElastic(selectedText);
+      console.log(response);
     }
     selectedText = "";
   }
 });
+
+let queryElastic = async (queryData) => {
+  res = await fetch('http://localhost:9200/test-5/_search', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Basic ZWxhc3RpYzpjaGFuZ2VtZQ=='
+    },
+    body: JSON.stringify({
+      "query": {
+          "match": {
+              "name": {
+                  "query": queryData,
+                  "minimum_should_match": "70%"
+              }
+          }
+      }
+    })
+  })
+  response = JSON.parse(await res.text())
+  return response;
+}
