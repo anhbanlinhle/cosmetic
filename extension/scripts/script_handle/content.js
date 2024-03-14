@@ -14,7 +14,7 @@ let getTextNodes = (element) => {
 }
 
 let checkWordImportance = (word) => {
-  if (word === "Kem Chống Nắng Nature Republic Nâng Tone Tự Nhiên 57ml") {
+  if (word === "Thích") {
     return RED;
   } else if (word === "Kem Chống Nắng Nature Republic California Aloe Daily Sun Block SPF50+PA++++ 57ml") {
     return ORANGE;
