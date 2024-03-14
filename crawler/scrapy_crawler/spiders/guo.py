@@ -103,6 +103,7 @@ class GuoSpider(BaseSpider):
                                                             url=response.url,
                                                             description=None,
                                                             safe_for_preg=preg_safe,
+                                                            spider_name=self.name,
                                                             is_en=False)
                 
                 yield self.make_final_result(scraped_ingredient)
@@ -126,6 +127,7 @@ class GuoSpider(BaseSpider):
                                                 name=product_name,
                                                 ingredients=ingredient_list,
                                                 description=merged_description,
+                                                spider_name=self.name,
                                                 url=response.url,
                                                 is_en=False)
 
@@ -153,6 +155,7 @@ class GuoSpider(BaseSpider):
                                                 url=response.url,
                                                 description=(description if description != None else None),
                                                 safe_for_preg=(safe_for_preg if safe_for_preg != None else -1),
+                                                spider_name=self.name,
                                                 is_en=False)
         
         yield self.make_final_result(scraped_ingredient)
