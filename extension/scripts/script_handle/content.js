@@ -19,7 +19,7 @@ let queryElastic = async (queryData) => {
           "match": {
               "name": {
                   "query": queryData,
-                  "minimum_should_match": "80%"
+                  "minimum_should_match": "65%"
               }
           }
       }
@@ -52,7 +52,13 @@ let scanForTexts = async (element) => {
         continue
       
       let color = await checkWordImportance(text)
-      element.style.background = COLOR[color]
+
+      const wrapper = document.createElement("span")
+      wrapper.style.background = COLOR[color]
+      for (const child of element.childNodes) {
+        wrapper.appendChild(child)
+      }
+      element.appendChild(wrapper)
     } 
     else if (child.nodeType === Node.ELEMENT_NODE) {
       scanForTexts(child)
@@ -68,7 +74,14 @@ let selectedElement = null
 document.addEventListener('mouseup', (event) => {
   selectedText = window.getSelection().toString()
   selectedElement = window.getSelection().baseNode.parentElement
-  selectedElement.classList.add("detected-product")
+  // selectedElement.classList.add("detected-product")
+  const wrapper = document.createElement("span")
+  wrapper.classList.add("detected-product")
+  for (const child of selectedElement.childNodes) {
+    wrapper.appendChild(child)
+  }
+  selectedElement.appendChild(wrapper)
+  console.clear()
 })
 
 chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
