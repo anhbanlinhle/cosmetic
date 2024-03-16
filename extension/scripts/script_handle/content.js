@@ -52,13 +52,7 @@ let scanForTexts = async (element) => {
         continue
       
       let color = await checkWordImportance(text)
-
-      const wrapper = document.createElement("span")
-      wrapper.style.background = COLOR[color]
-      for (const child of element.childNodes) {
-        wrapper.appendChild(child)
-      }
-      element.appendChild(wrapper)
+      element.style.background = COLOR[color]
     } 
     else if (child.nodeType === Node.ELEMENT_NODE) {
       scanForTexts(child)
@@ -75,13 +69,6 @@ document.addEventListener('mouseup', (event) => {
   selectedText = window.getSelection().toString()
   selectedElement = window.getSelection().baseNode.parentElement
   // selectedElement.classList.add("detected-product")
-  const wrapper = document.createElement("span")
-  wrapper.classList.add("detected-product")
-  for (const child of selectedElement.childNodes) {
-    wrapper.appendChild(child)
-  }
-  selectedElement.appendChild(wrapper)
-  console.clear()
 })
 
 chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
