@@ -1,9 +1,10 @@
 const FOUND = "#6eff92"
-const NOT_FOUND = "#d1d1d1"
+const FOUND_MANY = "#d1d1d1"
+const NOT_FOUND = "none"
 const COLOR = {
-  "-1": "none",
-  "0": NOT_FOUND,
-  "1": FOUND
+  "-1": NOT_FOUND,
+  "1": FOUND_MANY,
+  "0": FOUND
 }
 
 let queryElastic = async (queryData) => {
@@ -18,7 +19,7 @@ let queryElastic = async (queryData) => {
           "match": {
               "name": {
                   "query": queryData,
-                  "minimum_should_match": "80%"
+                  "minimum_should_match": "65%"
               }
           }
       }
@@ -32,9 +33,10 @@ let checkWordImportance = async (word) => {
   response = await queryElastic(word)
   let result = response.hits.hits.length
 
-  if (result > 0) {
+  if (result > 1)
     return 1
-  }
+  if (result === 1) 
+    return 0
   return -1
 }
 
@@ -60,19 +62,23 @@ let scanForTexts = async (element) => {
 
 scanForTexts(document.body);
 
-let selectedText = ""
+let selectedText = null
+let selectedElement = null
 
 document.addEventListener('mouseup', (event) => {
   selectedText = window.getSelection().toString()
+  selectedElement = window.getSelection().baseNode.parentElement
+  // selectedElement.classList.add("detected-product")
 })
 
 chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
   if (message.message === "trigger_search") {
-    console.log(selectedText);
+    console.log(selectedText)
     if (selectedText.length > 0) {
-      response = await queryElastic(selectedText);
-      console.log(response);
+      response = await queryElastic(selectedText)
+      console.log(response)
     }
     selectedText = ""
+    selectedElement = null
   }
 })
