@@ -1,8 +1,13 @@
 const excludedTags = new Set(["HEADER", "FOOTER", "IMG", "SVG", "INPUT", "SCRIPT", "LINK", "STYLE", "IFRAME", "BUTTON", "desc"]);
 const excludedTagsMutation = new Set(["HEADER", "FOOTER", "IMG", "SVG", "INPUT", "SCRIPT", "LINK", "STYLE", "IFRAME", "BODY", "BUTTON", "desc"]);
+const config = { subtree: true, childList: true };
+const MINIMUM_TEXT_LENGTH_THRESHOLD = 15;
 let countElImportant = 0;
 let countElUnimportant = 0;
-const config = { subtree: true, childList: true };
+
+const notUndefinedAndNull = (obj) => {
+    return obj !== undefined && obj !== null;
+}
 
 const isTextElement = (element) => {
   return Array.from(element.childNodes).every(child => child.nodeType === Node.TEXT_NODE);
@@ -14,12 +19,34 @@ const hasTextSibling = (element) => {
   const nextElementSibling = element.nextElementSibling;
   const previousElementSibling = element.previousElementSibling;
 
-  const nextSiblingTextNodeIsValid = (nextSibling !== null && nextSibling.nodeType == Node.TEXT_NODE && nextSibling.data.trim().length > 0);
-  const previousSiblingTextNodeIsValid = (previousSibling !== null && previousSibling.nodeType == Node.TEXT_NODE && previousSibling.data.trim().length > 0);
-  const nextElementSiblingIsValid = (nextElementSibling !== null && isTextElement(nextElementSibling));
-  const previousElementSiblingIsValid = (previousElementSibling !== null && isTextElement(previousElementSibling));
+  const nextSiblingNotEmpty = notUndefinedAndNull(nextSibling);
+  const previousSiblingNotEmpty = notUndefinedAndNull(previousSibling);
+  const nextElementSiblingNotEmpty = notUndefinedAndNull(nextElementSibling);
+  const previousElementSiblingNotEmpty = notUndefinedAndNull(previousElementSibling);
 
-  return (nextSiblingTextNodeIsValid || previousSiblingTextNodeIsValid || nextElementSiblingIsValid || previousElementSiblingIsValid);
+  const nextSiblingTextNodeIsValid = (nextSiblingNotEmpty && nextSibling.nodeType == Node.TEXT_NODE && nextSibling.data.trim().length > 0);
+  const previousSiblingTextNodeIsValid = (previousSiblingNotEmpty && previousSibling.nodeType == Node.TEXT_NODE && previousSibling.data.trim().length > 0);
+  const nextElementSiblingIsValid = (nextElementSiblingNotEmpty && isTextElement(nextElementSibling));
+  const previousElementSiblingIsValid = (previousElementSiblingNotEmpty && isTextElement(previousElementSibling));
+
+  let total_text_length = 0;
+  if (nextSiblingNotEmpty && nextSibling.nodeType == Node.TEXT_NODE) {
+    total_text_length += nextSibling.data.trim().length;
+  }
+  if (previousSiblingNotEmpty && previousSibling.nodeType == Node.TEXT_NODE) {
+    total_text_length += previousSibling.data.trim().length;
+  }
+  if (nextElementSiblingNotEmpty) {
+    total_text_length += nextElementSibling.textContent.trim().length;
+  }
+  if (previousElementSiblingNotEmpty) {
+    total_text_length += previousElementSibling.textContent.trim().length;
+  }
+
+  return {
+    "has_sibling": (nextSiblingTextNodeIsValid || previousSiblingTextNodeIsValid || nextElementSiblingIsValid || previousElementSiblingIsValid),
+    "sibling_text_length": total_text_length
+  }
 }
 
 const directTextElementIsImportant = (element) => {
@@ -38,15 +65,18 @@ const directTextElementIsImportant = (element) => {
     return false;
   }
 
-  return (merged.length >= 15 && merged.includes(" ")) || hasTextSibling(element);
+  const thisElementHasTextSibling = hasTextSibling(element);
+
+  return (merged.length >= MINIMUM_TEXT_LENGTH_THRESHOLD && merged.includes(" ")) || 
+            (thisElementHasTextSibling.has_sibling && (merged.length + thisElementHasTextSibling.sibling_text_length >= MINIMUM_TEXT_LENGTH_THRESHOLD));
 }
 
 const callback = (mutationList, observer) => {
   for (const mutation of mutationList) {
     if (!excludedTagsMutation.has(mutation.target.tagName) && mutation.addedNodes.length > 0) {
       for (const child of mutation.addedNodes) {  
-        // traverse(child);
-        console.log(child);
+        traverse(child);
+        // console.log(child);
       }
     }
   }
@@ -65,8 +95,8 @@ const traverse = (element) => {
 
   if (hasDirectText(element)) {
     if (isTextElement(element) && !directTextElementIsImportant(element)) {
-      // console.log(element, " --- unimportant");
-      // countElUnimportant++;
+      console.log(element, " --- unimportant");
+      countElUnimportant++;
     } else {
       countElImportant++;
       console.log(element, element.tagName);
@@ -87,8 +117,8 @@ window.addEventListener("load", (event) => {
   observer.observe(body, config);
   traverse(body);
 
-  setTimeout(() => {
-    console.log("important: ", countElImportant);
-    console.log("unimportant: ", countElUnimportant);
-  }, 10000);
+//   setTimeout(() => {
+//     console.log("important: ", countElImportant);
+//     console.log("unimportant: ", countElUnimportant);
+//   }, 10000);
 });

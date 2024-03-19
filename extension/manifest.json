@@ -21,7 +21,9 @@
 
   "content_scripts": [
     {
-      "js": ["scripts/script_handle/content.js"],
+      "js": [
+        "scripts/script_handle/content.js"
+      ],
       "css": ["css/content.css"],
       "matches": ["<all_urls>"]
     }
