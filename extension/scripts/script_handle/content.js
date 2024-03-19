@@ -149,10 +149,11 @@ const traverse = async (element) => {
       // countElUnimportant++;
     } else {
       countElImportant++;
-      // console.log(element, element.tagName);
-      console.log(element.textContent.trim());
+      console.log(element, element.tagName);
+      // console.log(element.textContent.trim());
       let color = await checkWordImportance(element.textContent.trim());
       element.style.background = COLOR[color]
+      // element.innerHTML =  `<span style="background: ${COLOR[color]};">${element.innerHTML}</span>`
     }
     // console.log("----------------------------------");
   }
