@@ -1,5 +1,4 @@
 const MINIMUM_TEXT_LENGTH_THRESHOLD = 15;
-const excludedTagsMutation = new Set(["HEADER", "FOOTER", "IMG", "SVG", "INPUT", "SCRIPT", "LINK", "STYLE", "IFRAME", "BODY", "BUTTON", "desc"]);
 
 //SECTION - utility function
 
@@ -69,17 +68,6 @@ const directTextElementIsImportant = (element) => {
             (thisElementHasTextSibling.has_sibling && (merged.length + thisElementHasTextSibling.sibling_text_length >= MINIMUM_TEXT_LENGTH_THRESHOLD));
 }
 
-const callback = (mutationList, observer) => {
-  for (const mutation of mutationList) {
-    if (!excludedTagsMutation.has(mutation.target.tagName) && mutation.addedNodes.length > 0) {
-      for (const child of mutation.addedNodes) {  
-        traverse(child);
-        // console.log(child);
-      }
-    }
-  }
-};
-
 const hasDirectText = (element) => {
   return Array.prototype.some.call(element.childNodes, function(child) {
     return child.nodeType === Node.TEXT_NODE && /\S/.test(child.nodeValue);
@@ -89,7 +77,6 @@ const hasDirectText = (element) => {
 module.exports = {
   hasDirectText,
   directTextElementIsImportant,
-  callback,
   notUndefinedAndNull,
   isTextElement,
   hasTextSibling
