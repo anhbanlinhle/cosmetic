@@ -21,7 +21,10 @@
 
   "content_scripts": [
     {
-      "js": ["scripts/script_handle/content.js"],
+      "js": [
+        "scripts/script_handle/content.js",
+        "scripts/background/passive_search.js"
+      ],
       "css": ["css/content.css"],
       "matches": ["<all_urls>"]
     }

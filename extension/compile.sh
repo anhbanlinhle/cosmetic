@@ -1,0 +1,1 @@
+browserify scripts/script_handle/main.js > scripts/script_handle/content.js
